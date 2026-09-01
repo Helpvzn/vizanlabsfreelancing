@@ -1,0 +1,9 @@
+name = "vizanlabs"
+compatibility_date = "2024-01-01"
+pages_build_output_dir = ".vercel/output/static"
+
+# Cloudflare Pages deployment config (Phase 7)
+# Use OpenNext adapter for full Next.js support on Cloudflare
+
+[vars]
+NEXT_PUBLIC_SITE_URL = "https://vizanlabs.com"

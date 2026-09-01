@@ -1,0 +1,1528 @@
+# MASTER PROMPT — FREE FREELANCE PROJECT MARKETPLACE
+
+You are a senior full-stack architect and developer.
+
+I want you to build a production-ready MVP of a freelance marketplace platform similar in concept to Upwork, Fiverr, and Freelancer, but with a different business model:
+
+**Clients can post freelance projects/jobs for FREE.
+Freelancers can create accounts, browse projects, and submit proposals for FREE.**
+
+The initial platform should avoid unnecessary paid services and should be designed to run primarily on Cloudflare's free/low-cost infrastructure.
+
+Do NOT copy the UI, branding, text, or proprietary design of Upwork, Fiverr, or Freelancer. Build an original product and UI inspired only by the general concept of a freelance marketplace.
+
+---
+
+# 1. CORE PRODUCT IDEA
+
+The platform connects two types of users:
+
+## CLIENT
+
+A client can:
+
+* Create an account
+* Create/edit profile
+* Post a freelance project
+* Add project title
+* Add detailed description
+* Select category
+* Add skills required
+* Set budget
+* Select budget type:
+
+  * Fixed price
+  * Hourly
+* Set project deadline
+* Add attachments
+* Receive proposals
+* View freelancer profiles
+* Shortlist freelancers
+* Accept/reject proposals
+* Message freelancers
+* Manage projects
+* Leave reviews after project completion
+
+## FREELANCER
+
+A freelancer can:
+
+* Create an account
+* Create/edit profile
+* Add professional title
+* Add description
+* Add skills
+* Add experience
+* Add portfolio items
+* Add hourly rate
+* Add profile picture
+* Browse/search projects
+* Filter projects
+* Open project details
+* Submit proposals
+* Set proposed price
+* Add estimated delivery time
+* Write cover letter
+* Message clients
+* Track submitted proposals
+* Manage active projects
+* Leave reviews after project completion
+
+---
+
+# 2. MAIN DIFFERENTIATOR
+
+The platform should initially be positioned as:
+
+"Post projects for free. Find freelance opportunities for free."
+
+Do NOT force users to pay to:
+
+* Create an account
+* Post a project
+* Browse projects
+* Create a freelancer profile
+* Submit normal proposals
+* Send normal messages
+
+The platform should be designed so monetization can be added later.
+
+Possible future monetization:
+
+* Featured projects
+* Featured freelancer profiles
+* Premium visibility
+* Verified profiles
+* Optional commission
+* Premium memberships
+* Sponsored listings
+
+Do not implement complex payments in the first MVP unless specifically requested later.
+
+---
+
+# 3. TECHNOLOGY STACK
+
+Use a modern Cloudflare-friendly architecture.
+
+Preferred stack:
+
+Frontend:
+
+* Next.js
+* React
+* TypeScript
+* Tailwind CSS
+
+Backend:
+
+* Cloudflare Workers
+* TypeScript
+
+Database:
+
+* Cloudflare D1
+* SQL
+
+Object/file storage:
+
+* Cloudflare R2
+
+Caching/session/temporary data:
+
+* Cloudflare KV where appropriate
+
+Authentication:
+
+* Secure email/password authentication
+* Password hashing
+* Secure session/token handling
+* HTTP-only cookies where appropriate
+
+Deployment:
+
+* Cloudflare Pages / Cloudflare Workers
+* Cloudflare DNS
+* Cloudflare R2
+* Cloudflare D1
+
+Do not introduce unnecessary infrastructure such as a traditional VPS, Docker server, PHP server, MySQL server, Redis server, or WordPress.
+
+The application must be designed around serverless/edge infrastructure.
+
+---
+
+# 4. PROJECT ARCHITECTURE
+
+Use a clean modular architecture.
+
+Suggested structure:
+
+/app
+/(public)
+/(auth)
+/dashboard
+/projects
+/freelancers
+/messages
+/profile
+/settings
+/admin
+
+/components
+/ui
+/forms
+/projects
+/freelancers
+/messages
+/layout
+
+/lib
+/auth
+/db
+/validation
+/storage
+/utils
+
+/api or Worker routes:
+authentication
+users
+projects
+proposals
+messages
+reviews
+notifications
+reports
+admin
+
+Keep business logic separated from UI.
+
+Do not put everything inside a single huge file.
+
+---
+
+# 5. DATABASE DESIGN
+
+Create a proper relational schema in Cloudflare D1.
+
+At minimum create:
+
+## users
+
+Fields:
+
+* id
+* email
+* password_hash
+* role
+* first_name
+* last_name
+* username
+* avatar_url
+* bio
+* location
+* country
+* timezone
+* created_at
+* updated_at
+* status
+
+Roles:
+
+* client
+* freelancer
+* admin
+
+---
+
+## freelancer_profiles
+
+Fields:
+
+* id
+* user_id
+* professional_title
+* description
+* hourly_rate
+* experience_level
+* availability
+* profile_visibility
+* created_at
+* updated_at
+
+---
+
+## skills
+
+Fields:
+
+* id
+* name
+* slug
+
+---
+
+## user_skills
+
+Fields:
+
+* user_id
+* skill_id
+
+---
+
+## categories
+
+Fields:
+
+* id
+* name
+* slug
+* description
+* icon
+* status
+
+Examples:
+
+* Web Development
+* Mobile Development
+* Design
+* Writing
+* Marketing
+* SEO
+* Video Editing
+* Data Entry
+* AI Services
+* Business
+* Translation
+* Virtual Assistance
+
+---
+
+## projects
+
+Fields:
+
+* id
+* client_id
+* title
+* slug
+* description
+* category_id
+* budget_min
+* budget_max
+* budget_type
+* experience_level
+* deadline
+* status
+* created_at
+* updated_at
+
+Project status:
+
+* draft
+* open
+* paused
+* awarded
+* completed
+* cancelled
+* closed
+
+---
+
+## project_skills
+
+Fields:
+
+* project_id
+* skill_id
+
+---
+
+## project_attachments
+
+Fields:
+
+* id
+* project_id
+* file_name
+* file_url
+* file_size
+* mime_type
+* created_at
+
+Store actual files in Cloudflare R2.
+
+---
+
+## proposals
+
+Fields:
+
+* id
+* project_id
+* freelancer_id
+* cover_letter
+* proposed_amount
+* estimated_days
+* status
+* created_at
+* updated_at
+
+Proposal status:
+
+* submitted
+* viewed
+* shortlisted
+* rejected
+* accepted
+* withdrawn
+
+Prevent the same freelancer from submitting multiple active proposals to the same project unless explicitly allowed.
+
+---
+
+## conversations
+
+Fields:
+
+* id
+* project_id
+* client_id
+* freelancer_id
+* created_at
+* updated_at
+
+---
+
+## messages
+
+Fields:
+
+* id
+* conversation_id
+* sender_id
+* message
+* attachment_url
+* read_at
+* created_at
+
+---
+
+## reviews
+
+Fields:
+
+* id
+* project_id
+* reviewer_id
+* reviewed_user_id
+* rating
+* review_text
+* created_at
+
+Prevent duplicate reviews for the same completed project/user relationship.
+
+---
+
+## notifications
+
+Fields:
+
+* id
+* user_id
+* type
+* title
+* message
+* link
+* read_at
+* created_at
+
+---
+
+## saved_projects
+
+Fields:
+
+* user_id
+* project_id
+* created_at
+
+---
+
+## reports
+
+Fields:
+
+* id
+* reporter_id
+* target_type
+* target_id
+* reason
+* description
+* status
+* created_at
+
+---
+
+## sessions
+
+Implement secure authentication/session management.
+
+---
+
+# 6. PUBLIC WEBSITE
+
+Create a professional modern homepage.
+
+Homepage sections:
+
+### Header
+
+Logo:
+
+Use an original placeholder brand name such as:
+
+"FreeLanceHub"
+
+Make the branding easy to change later.
+
+Navigation:
+
+* Find Projects
+* Find Freelancers
+* How It Works
+* Categories
+* Login
+* Sign Up
+
+If logged in:
+
+* Dashboard
+* Messages
+* Notifications
+* Profile
+* Logout
+
+---
+
+### Hero
+
+Headline:
+
+"Find Great Freelance Work. Post Projects for Free."
+
+Subheading explaining the marketplace.
+
+Primary CTA:
+
+"Post a Project"
+
+Secondary CTA:
+
+"Find Freelance Work"
+
+---
+
+### Search
+
+Allow users to search:
+
+* Projects
+* Freelancers
+* Skills
+
+---
+
+### Popular Categories
+
+Display category cards.
+
+---
+
+### Latest Projects
+
+Show recently posted open projects.
+
+Each card:
+
+* Title
+* Category
+* Budget
+* Budget type
+* Required skills
+* Experience level
+* Time/date posted
+* Number of proposals
+* Save button
+
+---
+
+### How It Works
+
+For clients:
+
+1. Create account
+2. Post project
+3. Receive proposals
+4. Choose freelancer
+
+For freelancers:
+
+1. Create profile
+2. Find projects
+3. Submit proposal
+4. Work with client
+
+---
+
+# 7. AUTHENTICATION
+
+Build:
+
+* Sign up
+* Login
+* Logout
+* Forgot password
+* Reset password
+* Email verification architecture
+* Session management
+
+During signup ask:
+
+"How will you use the platform?"
+
+Options:
+
+* I want to hire freelancers
+* I want to find freelance work
+
+Users can later switch/add capabilities if desired.
+
+Never store plaintext passwords.
+
+Validate:
+
+* Email
+* Password strength
+* Username uniqueness
+
+Protect authenticated routes.
+
+---
+
+# 8. CLIENT DASHBOARD
+
+Create a clean dashboard.
+
+Show:
+
+* Active projects
+* Draft projects
+* Completed projects
+* New proposals
+* Shortlisted freelancers
+* Recent messages
+
+Buttons:
+
+"Post New Project"
+
+"Manage Projects"
+
+"View Proposals"
+
+---
+
+# 9. POST PROJECT FLOW
+
+Create a multi-step or well-organized form.
+
+Step 1:
+
+Project title
+
+Step 2:
+
+Description
+
+Step 3:
+
+Category
+
+Step 4:
+
+Skills
+
+Step 5:
+
+Budget
+
+Step 6:
+
+Deadline
+
+Step 7:
+
+Attachments
+
+Step 8:
+
+Preview
+
+Step 9:
+
+Publish
+
+Validate everything server-side.
+
+Do not trust client-side validation alone.
+
+---
+
+# 10. PROJECT DISCOVERY
+
+Create:
+
+/projects
+
+Features:
+
+* Search
+* Category filter
+* Budget filter
+* Experience filter
+* Project type filter
+* Sort by:
+
+  * Newest
+  * Budget
+  * Most relevant
+
+Project cards should be clean and compact.
+
+---
+
+# 11. PROJECT DETAILS PAGE
+
+Create:
+
+/projects/[slug]
+
+Display:
+
+* Project title
+* Description
+* Budget
+* Category
+* Skills
+* Deadline
+* Experience level
+* Attachments
+* Client information
+* Client rating
+* Proposal count
+* Posted date
+
+CTA:
+
+"Submit Proposal"
+
+"Save Project"
+
+"Message Client"
+
+---
+
+# 12. FREELANCER DIRECTORY
+
+Create:
+
+/freelancers
+
+Features:
+
+* Search
+* Skills filter
+* Category
+* Experience
+* Hourly rate
+* Rating
+* Location
+
+Freelancer card:
+
+* Avatar
+* Name
+* Professional title
+* Rating
+* Skills
+* Hourly rate
+* Short bio
+
+---
+
+# 13. FREELANCER PROFILE
+
+Create:
+
+/freelancers/[username]
+
+Display:
+
+* Profile image
+* Name
+* Professional title
+* Bio
+* Skills
+* Experience
+* Hourly rate
+* Portfolio
+* Reviews
+* Rating
+* Completed projects
+* Availability
+
+CTA for client:
+
+"Invite to Project"
+
+"Message"
+
+---
+
+# 14. PROPOSAL SYSTEM
+
+Freelancer clicks:
+
+"Submit Proposal"
+
+Form:
+
+* Cover letter
+* Proposed amount
+* Estimated delivery time
+* Optional attachment
+
+Show confirmation before submission.
+
+Client proposal dashboard:
+
+* All proposals
+* New
+* Shortlisted
+* Accepted
+* Rejected
+
+Client can:
+
+* View profile
+* Shortlist
+* Reject
+* Message
+* Accept proposal
+
+When proposal is accepted:
+
+Project status becomes:
+
+"awarded"
+
+---
+
+# 15. MESSAGING SYSTEM
+
+Build basic private messaging.
+
+Requirements:
+
+* Client ↔ Freelancer
+* Conversation list
+* Message history
+* Unread count
+* Read status
+* Timestamp
+* Optional file attachment
+
+Security requirement:
+
+Users can only access conversations they are participants in.
+
+Do not expose conversation IDs publicly without authorization checks.
+
+---
+
+# 16. REVIEWS
+
+After a project is completed:
+
+Client can review freelancer.
+
+Freelancer can review client.
+
+Rating:
+
+1–5 stars.
+
+Text review.
+
+Display reviews on profiles.
+
+Prevent:
+
+* Fake duplicate reviews
+* Unauthorized reviews
+* Reviews before project completion
+
+---
+
+# 17. ADMIN PANEL
+
+Create:
+
+/admin
+
+Admin features:
+
+### Dashboard
+
+* Total users
+* Clients
+* Freelancers
+* Projects
+* Proposals
+* Reports
+
+### Users
+
+* Search users
+* View profile
+* Suspend account
+* Activate account
+* Delete account
+
+### Projects
+
+* View projects
+* Remove project
+* Close project
+* Review reported projects
+
+### Reports
+
+* View reports
+* Mark pending
+* Resolve
+* Reject
+* Take moderation action
+
+### Categories
+
+* Create category
+* Edit category
+* Disable category
+
+Admin routes must be securely protected.
+
+Never rely only on hiding the admin link.
+
+---
+
+# 18. SECURITY
+
+Security is extremely important.
+
+Implement:
+
+* Password hashing
+* Secure sessions
+* CSRF protection where applicable
+* Server-side authorization
+* Input validation
+* SQL injection protection through parameterized queries
+* XSS protection
+* Rate limiting
+* File upload validation
+* File size limits
+* MIME type validation
+* Authorization checks on every private resource
+* Secure cookies
+* Security headers
+
+Never trust:
+
+* user IDs from frontend
+* role values from frontend
+* project ownership claims
+* proposal ownership claims
+* conversation IDs
+* uploaded filenames
+
+Every sensitive operation must be authorized on the server.
+
+---
+
+# 19. FILE UPLOADS
+
+Use Cloudflare R2.
+
+Allowed examples:
+
+Images:
+
+* JPG
+* JPEG
+* PNG
+* WebP
+
+Documents:
+
+* PDF
+* DOCX
+* XLSX
+
+Set reasonable file-size limits.
+
+Never allow arbitrary executable uploads.
+
+Generate safe storage keys instead of using the original filename directly.
+
+---
+
+# 20. SEO
+
+The public website should be SEO-friendly.
+
+Implement:
+
+* Dynamic page titles
+* Meta descriptions
+* Open Graph metadata
+* Canonical URLs
+* sitemap
+* robots.txt
+* SEO-friendly project slugs
+
+Project pages should be indexable when appropriate.
+
+Private dashboard pages must not be indexed.
+
+---
+
+# 21. RESPONSIVE DESIGN
+
+The website must work on:
+
+* Desktop
+* Tablet
+* Mobile
+
+Mobile navigation should be properly designed.
+
+Do not simply shrink desktop UI.
+
+Create a real mobile experience.
+
+---
+
+# 22. UI/UX
+
+Design should be:
+
+* Modern
+* Professional
+* Minimal
+* Fast
+* Trustworthy
+* Easy to understand
+
+Use a clean SaaS/marketplace style.
+
+Do NOT copy Upwork/Fiverr colors or exact layouts.
+
+Use:
+
+* Cards
+* Clear typography
+* Consistent spacing
+* Proper empty states
+* Loading states
+* Error states
+* Toast notifications
+* Confirmation dialogs
+
+Accessibility:
+
+* Keyboard navigation
+* Proper labels
+* Semantic HTML
+* Good contrast
+* Accessible buttons/forms
+
+---
+
+# 23. PERFORMANCE
+
+Optimize for Cloudflare edge deployment.
+
+Requirements:
+
+* Minimize unnecessary API calls
+* Use pagination
+* Use database indexes
+* Lazy-load images
+* Optimize images
+* Avoid N+1 queries
+* Cache public data where appropriate
+* Keep API responses small
+* Use cursor-based pagination where appropriate
+
+Never load thousands of projects at once.
+
+---
+
+# 24. SEARCH
+
+For MVP, implement efficient SQL-based search.
+
+Search fields:
+
+Projects:
+
+* title
+* description
+* skills
+* category
+
+Freelancers:
+
+* name
+* professional title
+* bio
+* skills
+
+Build the system so a dedicated search engine can be added later if the platform grows.
+
+---
+
+# 25. NOTIFICATIONS
+
+Create notifications for:
+
+Client:
+
+* New proposal
+* New message
+* Proposal accepted
+* Proposal rejected
+* Freelancer shortlisted
+
+Freelancer:
+
+* Proposal viewed
+* Proposal shortlisted
+* Proposal rejected
+* Proposal accepted
+* New message
+
+Add:
+
+* unread count
+* mark as read
+* mark all as read
+
+---
+
+# 26. EMAIL ARCHITECTURE
+
+Do not make paid email services mandatory for the MVP.
+
+Create an email service abstraction such as:
+
+sendVerificationEmail()
+sendPasswordResetEmail()
+sendProposalNotification()
+sendMessageNotification()
+
+The provider should be replaceable later.
+
+---
+
+# 27. CLOUDFLARE CONFIGURATION
+
+Create the necessary configuration for:
+
+* Cloudflare Workers
+* D1
+* R2
+* KV if needed
+* Environment variables
+* Local development
+* Production deployment
+
+Provide:
+
+* wrangler configuration
+* database migrations
+* seed data
+* development instructions
+* production deployment instructions
+
+Never hardcode:
+
+* secrets
+* passwords
+* API keys
+* tokens
+
+Use environment variables/secrets.
+
+---
+
+# 28. DATABASE INDEXES
+
+Create indexes for frequently queried fields.
+
+Examples:
+
+users.email
+users.username
+projects.client_id
+projects.category_id
+projects.status
+projects.created_at
+proposals.project_id
+proposals.freelancer_id
+messages.conversation_id
+notifications.user_id
+
+Choose additional indexes based on actual queries.
+
+Do not blindly index every column.
+
+---
+
+# 29. DEMO DATA
+
+Create a seed script with:
+
+* Demo categories
+* Demo skills
+* Demo users
+* Demo projects
+* Demo freelancer profiles
+
+Do not use real people's personal information.
+
+---
+
+# 30. ERROR HANDLING
+
+Every API endpoint should return consistent responses.
+
+Example:
+
+Success:
+
+{
+"success": true,
+"data": {}
+}
+
+Error:
+
+{
+"success": false,
+"error": {
+"code": "VALIDATION_ERROR",
+"message": "Invalid project data"
+}
+}
+
+Do not expose internal stack traces to users.
+
+Log useful server-side information safely.
+
+---
+
+# 31. EMPTY STATES
+
+Create useful empty states.
+
+Examples:
+
+"No projects found."
+
+"You haven't posted any projects yet."
+
+"You haven't submitted any proposals yet."
+
+"You don't have any messages yet."
+
+Do not leave blank screens.
+
+---
+
+# 32. RATE LIMITING
+
+Implement rate limiting for:
+
+* Login
+* Signup
+* Password reset
+* Proposal submission
+* Messaging
+* Project creation
+* Reports
+
+The goal is to prevent spam and abuse.
+
+---
+
+# 33. ANTI-SPAM / MODERATION
+
+Since posting and proposals are FREE, assume that spam will happen.
+
+Build the architecture for:
+
+* Report project
+* Report user
+* Block user
+* Account suspension
+* Rate limits
+* Admin moderation
+* Basic suspicious activity detection
+
+Do not automatically ban legitimate users based on a single signal.
+
+---
+
+# 34. PRIVACY
+
+Users should not be forced to expose private information publicly.
+
+Do not publicly expose:
+
+* Email address
+* Password
+* Private messages
+* Private attachments
+* Internal IDs unnecessarily
+
+User profile should show only information intended to be public.
+
+---
+
+# 35. FUTURE FEATURES
+
+Architect the code so these can be added later:
+
+* Payments
+* Escrow
+* Platform commission
+* Featured projects
+* Premium memberships
+* Freelancer verification
+* Client verification
+* AI project recommendations
+* AI proposal assistance
+* Advanced search
+* Saved searches
+* Freelancer availability calendar
+* Contracts
+* Milestones
+* Time tracking
+* Dispute system
+* Multi-language support
+* Multi-currency support
+
+Do NOT build all of these now.
+
+Keep the MVP focused.
+
+---
+
+# 36. IMPORTANT DEVELOPMENT RULE
+
+DO NOT generate the entire application blindly in one step.
+
+Build the project in phases.
+
+## PHASE 1
+
+First create:
+
+* Project setup
+* Next.js/React frontend
+* TypeScript
+* Tailwind
+* Cloudflare configuration
+* D1 database
+* Database migrations
+* Authentication
+* User roles
+* Basic layout
+
+Then stop and explain what was created.
+
+## PHASE 2
+
+Build:
+
+* Client dashboard
+* Freelancer dashboard
+* Profile system
+* Categories
+* Skills
+
+Then stop.
+
+## PHASE 3
+
+Build:
+
+* Project creation
+* Project listing
+* Project search
+* Project details
+* Project management
+
+Then stop.
+
+## PHASE 4
+
+Build:
+
+* Proposal system
+* Proposal management
+* Shortlisting
+* Accept/reject
+
+Then stop.
+
+## PHASE 5
+
+Build:
+
+* Messaging
+* Notifications
+
+Then stop.
+
+## PHASE 6
+
+Build:
+
+* Reviews
+* Reports
+* Moderation
+* Admin panel
+
+Then stop.
+
+## PHASE 7
+
+Build:
+
+* SEO
+* Performance optimization
+* Security hardening
+* Responsive/mobile optimization
+* Cloudflare deployment
+
+---
+
+# 37. AI CODING INSTRUCTIONS
+
+You are working as my senior developer.
+
+Before writing significant code:
+
+1. Inspect the existing project.
+2. Understand the current architecture.
+3. Do not overwrite working code unnecessarily.
+4. Reuse existing components when appropriate.
+5. Keep code modular.
+6. Explain major architectural decisions briefly.
+7. Implement one phase at a time.
+8. After each phase, run/build/test the project.
+9. Fix errors before moving forward.
+10. Do not create fake implementations for core functionality.
+11. Do not use mock data where real database functionality is required.
+12. Do not hardcode user/project data.
+13. Use proper database queries.
+14. Validate data on the server.
+15. Follow secure coding practices.
+
+If a requirement is technically incompatible with Cloudflare's architecture, explain the problem and propose the closest Cloudflare-compatible solution instead of silently changing the architecture.
+
+---
+
+# 38. FINAL MVP REQUIREMENT
+
+The final MVP should allow this complete flow:
+
+CLIENT:
+
+Signup
+→ Login
+→ Create profile
+→ Post project
+→ Publish project
+→ Receive proposals
+→ View freelancer
+→ Message freelancer
+→ Accept proposal
+→ Complete project
+→ Review freelancer
+
+FREELANCER:
+
+Signup
+→ Login
+→ Create profile
+→ Add skills
+→ Browse projects
+→ Search/filter
+→ Open project
+→ Submit proposal
+→ Receive response
+→ Message client
+→ Get project
+→ Complete project
+→ Review client
+
+ADMIN:
+
+Login
+→ Dashboard
+→ Manage users
+→ Manage projects
+→ Manage categories
+→ Manage reports
+→ Suspend users/projects
+
+---
+
+# 39. FIRST TASK
+
+Do NOT start coding the whole application immediately.
+
+First:
+
+1. Analyze this specification.
+2. Propose the exact final technology architecture.
+3. Propose the folder structure.
+4. Propose the D1 database schema.
+5. Identify Cloudflare services required.
+6. Identify anything that cannot realistically run on the free tier.
+7. Identify security risks.
+8. Identify MVP features that should be removed or simplified.
+9. Give me the implementation roadmap.
+10. Then wait for my confirmation before starting Phase 1.
+
+Remember:
+
+The primary objective is:
+
+**A real, usable freelance marketplace that can initially operate with minimal infrastructure cost, while remaining scalable enough to grow later.**
