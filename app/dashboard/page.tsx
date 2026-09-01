@@ -1,3 +1,4 @@
+export const runtime = 'edge';
 import Link from "next/link";
 import { getCurrentProfile } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";

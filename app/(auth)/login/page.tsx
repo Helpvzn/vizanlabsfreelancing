@@ -1,3 +1,4 @@
+export const runtime = 'edge';
 import { LoginForm } from "@/components/forms/login-form";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
