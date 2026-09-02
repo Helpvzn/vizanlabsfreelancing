@@ -5,9 +5,7 @@ export const signupSchema = z
     email: z.string().email("Enter a valid email"),
     password: z
       .string()
-      .min(8, "Password must be at least 8 characters")
-      .regex(/[A-Z]/, "Include at least one uppercase letter")
-      .regex(/[0-9]/, "Include at least one number"),
+      .min(8, "Password must be at least 8 characters"),
     confirmPassword: z.string(),
     firstName: z.string().min(1, "First name is required").max(50),
     lastName: z.string().min(1, "Last name is required").max(50),
@@ -15,7 +13,7 @@ export const signupSchema = z
       .string()
       .min(3, "Username must be at least 3 characters")
       .max(30)
-      .regex(/^[a-z0-9_]+$/, "Use lowercase letters, numbers, and underscores only"),
+      .regex(/^[a-zA-Z0-9_-]+$/, "Username can only contain letters, numbers, _ and -"),
     role: z.enum(["client", "freelancer"], {
       message: "Select how you will use the platform",
     }),

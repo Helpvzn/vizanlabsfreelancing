@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import { Briefcase, Users } from "lucide-react";
 import { signupAction, type AuthActionState } from "@/lib/auth/actions";
@@ -9,11 +9,51 @@ import { Input, Label } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
-const initialState: AuthActionState = {};
-
 export function SignupForm() {
-  const [state, formAction, pending] = useActionState(signupAction, initialState);
   const [role, setRole] = useState<"client" | "freelancer">("client");
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Keep field values so they don't clear on error
+  const [fields, setFields] = useState({
+    firstName: "",
+    lastName: "",
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFields((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setPending(true);
+    setError(null);
+
+    const formData = new FormData();
+    formData.append("role", role);
+    formData.append("firstName", fields.firstName);
+    formData.append("lastName", fields.lastName);
+    formData.append("username", fields.username);
+    formData.append("email", fields.email);
+    formData.append("password", fields.password);
+    formData.append("confirmPassword", fields.confirmPassword);
+
+    try {
+      const result: AuthActionState = await signupAction({}, formData);
+      if (result?.error) {
+        setError(result.error);
+      }
+      // If no error & no return → server redirected (success)
+    } catch {
+      // redirect() throws — that means success, do nothing
+    } finally {
+      setPending(false);
+    }
+  };
 
   return (
     <Card className="w-full max-w-lg">
@@ -24,10 +64,10 @@ export function SignupForm() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form action={formAction} className="space-y-4">
-          {state.error && (
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {error && (
             <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
-              {state.error}
+              {error}
             </p>
           )}
 
@@ -63,38 +103,80 @@ export function SignupForm() {
                 <span className="text-xs text-slate-500">Browse projects and submit proposals</span>
               </button>
             </div>
-            <input type="hidden" name="role" value={role} />
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="firstName">First name</Label>
-              <Input id="firstName" name="firstName" required />
+              <Input
+                id="firstName"
+                name="firstName"
+                required
+                value={fields.firstName}
+                onChange={handleChange}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="lastName">Last name</Label>
-              <Input id="lastName" name="lastName" required />
+              <Input
+                id="lastName"
+                name="lastName"
+                required
+                value={fields.lastName}
+                onChange={handleChange}
+              />
             </div>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="username">Username</Label>
-            <Input id="username" name="username" required placeholder="your_name" />
+            <Input
+              id="username"
+              name="username"
+              required
+              placeholder="your_name"
+              value={fields.username}
+              onChange={handleChange}
+            />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" name="email" type="email" required autoComplete="email" />
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              required
+              autoComplete="email"
+              value={fields.email}
+              onChange={handleChange}
+            />
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" name="password" type="password" required autoComplete="new-password" />
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                required
+                autoComplete="new-password"
+                value={fields.password}
+                onChange={handleChange}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">Confirm password</Label>
-              <Input id="confirmPassword" name="confirmPassword" type="password" required autoComplete="new-password" />
+              <Input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                required
+                autoComplete="new-password"
+                value={fields.confirmPassword}
+                onChange={handleChange}
+              />
             </div>
           </div>
 
